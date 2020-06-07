@@ -103,6 +103,10 @@ Here are the flags available for inference:
 --config       The config file used for training the model.
 ```
 
+### Pre-trained models
+
+Pre-trained models can be downloaded [here](https://github.com/yassouali/CCT/releases).
+
 ### Citation ✏️ 📄
 
 If you find this repo useful for your research, please consider citing the paper as follows:
