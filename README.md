@@ -123,7 +123,7 @@ If you find this repo useful for your research, please consider citing the paper
 }
 ```
 
-For any questions, please contact Yassine Ouali (yassine.ouali@centralesupelec.fr).
+For any questions, please contact Yassine Ouali.
 
 #### Config file details ⚙️
 
