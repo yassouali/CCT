@@ -112,14 +112,12 @@ Pre-trained models can be downloaded [here](https://github.com/yassouali/CCT/rel
 If you find this repo useful for your research, please consider citing the paper as follows:
 
 ```
-@inproceedings{ouali2020semi,
-  title={Semi-Supervised Semantic Segmentation with Cross-Consistency Training},
-  author={Ouali, Yassine and Hudelot, C{\'e}line and Tami, Myriam},
-  year = {2020},
-  booktitle = {Conference on Computer Vision and Pattern Recognition (CVPR)},
-  note = {to appear},
-  pubstate = {published},
-  tppubtype = {inproceedings}
+@InProceedings{Ouali_2020_CVPR,
+  author = {Ouali, Yassine and Hudelot, Celine and Tami, Myriam},
+  title = {Semi-Supervised Semantic Segmentation With Cross-Consistency Training},
+  booktitle = {The IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+  month = {June},
+  year = {2020}
 }
 ```
 
