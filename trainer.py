@@ -52,8 +52,8 @@ class Trainer(BaseTrainer):
         self.model.train()
 
         if self.mode == 'supervised':
-            dataloader = iter(cycle(self.supervised_loader))
-            tbar = tqdm(range(len(self.unsupervised_loader)), ncols=135)
+            dataloader = iter(self.supervised_loader)
+            tbar = tqdm(range(len(self.supervised_loader)), ncols=135)
         else:
             dataloader = iter(zip(cycle(self.supervised_loader), self.unsupervised_loader))
             tbar = tqdm(range(len(self.unsupervised_loader)), ncols=135)
