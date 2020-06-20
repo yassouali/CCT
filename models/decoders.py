@@ -215,7 +215,7 @@ class CutOutDecoder(nn.Module):
         return x
 
 
-def guided_masking(x, output, gaussian_conv, upscale, resize, return_msk_context=True, return_msk_objects=False):
+def guided_masking(x, output, upscale, resize, return_msk_context=True):
     if len(output.shape) == 3:
         masks_context = (output > 0).float().unsqueeze(1)
     else:
@@ -228,15 +228,8 @@ def guided_masking(x, output, gaussian_conv, upscale, resize, return_msk_context
         return x_masked_context
 
     masks_objects = (1 - masks_context)
-    if return_msk_objects:
-        x_masked_objects = masks_objects * x
-        return x_masked_objects
-
-    x_masked_context = masks_context * x
-    x_blured_objs = gaussian_conv(x).detach() * masks_context
-    x_blured_objs = x_blured_objs + (x * masks_objects)
-
-    return x_blured_objs
+    x_masked_objects = masks_objects * x
+    return x_masked_objects
 
 
 class ContextMaskingDecoder(nn.Module):
@@ -245,10 +238,9 @@ class ContextMaskingDecoder(nn.Module):
         self.upscale = upscale
         self.upsample = upsample(conv_in_ch, num_classes, upscale=upscale)
 
-
     def forward(self, x, pred=None):
         x_masked_context = guided_masking(x, pred, resize=(x.size(2), x.size(3)),
-                                        gaussian_conv=None, upscale=self.upscale, return_msk_context=True)
+                                          upscale=self.upscale, return_msk_context=True)
         x_masked_context = self.upsample(x_masked_context)
         return x_masked_context
 
@@ -260,10 +252,9 @@ class ObjectMaskingDecoder(nn.Module):
         self.upsample = upsample(conv_in_ch, num_classes, upscale=upscale)
 
     def forward(self, x, pred=None):
-        x_masked_context = guided_masking(x, pred, resize=(x.size(2), x.size(3)),
-                                        gaussian_conv=None, upscale=self.upscale, return_msk_context=False,
-                                        return_msk_objects=True)
-        x_masked_context = self.upsample(x_masked_context)
+        x_masked_obj = guided_masking(x, pred, resize=(x.size(2), x.size(3)),
+                                      upscale=self.upscale, return_msk_context=False)
+        x_masked_obj = self.upsample(x_masked_obj)
 
-        return x_masked_context
+        return x_masked_obj
 
