@@ -201,13 +201,13 @@ class Trainer(BaseTrainer):
         seg_metrics_l = eval_metrics(outputs['sup_pred'], target_l, self.num_classes, self.ignore_index)
         self._update_seg_metrics(*seg_metrics_l, True)
         seg_metrics_l = self._get_seg_metrics(True)
-        self.mIoU_l, self.pixel_acc_l, self.class_iou_l = seg_metrics_l.values()
+        self.pixel_acc_l, self.mIoU_l, self.class_iou_l = seg_metrics_l.values()
 
         if self.mode == 'semi':
             seg_metrics_ul = eval_metrics(outputs['unsup_pred'], target_ul, self.num_classes, self.ignore_index)
             self._update_seg_metrics(*seg_metrics_ul, False)
             seg_metrics_ul = self._get_seg_metrics(False)
-            self.mIoU_ul, self.pixel_acc_ul, self.class_iou_ul = seg_metrics_ul.values()
+            self.pixel_acc_ul, self.mIoU_ul, self.class_iou_ul = seg_metrics_ul.values()
             
 
 
