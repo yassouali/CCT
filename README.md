@@ -1,6 +1,6 @@
 
 
-## Semi-Supervised Semantic Segmentation with Cross-Consistecy Training (CCT)
+## Semi-Supervised Semantic Segmentation with Cross-Consistency Training (CCT)
 
 #### [Paper](https://arxiv.org/abs/2003.09005), [Project Page](https://yassouali.github.io/cct_page/)
 
