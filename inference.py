@@ -91,7 +91,7 @@ def main():
     model.eval()
     model.cuda()
 
-    if args.save and not os.path.exists('outputs'):
+    if not os.path.exists('outputs'):
         os.makedirs('outputs')
 
     # LOOP OVER THE DATA
