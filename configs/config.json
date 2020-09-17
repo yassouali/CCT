@@ -2,7 +2,7 @@
     "name": "CCT",
     "experim_name": "CCT",
     "n_gpu": 1,
-    "n_labeled_examples": 1464,
+    "n_labeled_examples": 100,
     "diff_lrs": true,
     "ramp_up": 0.1,
     "unsupervised_w": 30,
@@ -57,7 +57,7 @@
 
 
     "train_supervised": {
-        "data_dir": "VOCtrainval_11-May-2012",
+        "data_dir": "CCT/Data",
         "batch_size": 10,
         "crop_size": 320,
         "shuffle": true,
@@ -72,7 +72,7 @@
     },
 
     "train_unsupervised": {
-        "data_dir": "VOCtrainval_11-May-2012",
+        "data_dir": "CCT/Data",
         "weak_labels_output": "pseudo_labels/result/pseudo_labels",
         "batch_size": 10,
         "crop_size": 320,
@@ -88,7 +88,7 @@
     },
 
     "val_loader": {
-        "data_dir": "VOCtrainval_11-May-2012",
+        "data_dir": "CCT/Data",
         "batch_size": 1,
         "val": true,
         "split": "val",
@@ -97,9 +97,9 @@
     },
 
     "trainer": {
-        "epochs": 80,
+        "epochs": 5,
         "save_dir": "saved/",
-        "save_period": 5,
+        "save_period": 1,
   
         "monitor": "max Mean_IoU",
         "early_stop": 10,
