@@ -20,9 +20,9 @@ class VOCDataset(BaseDataSet):
     def _set_files(self):
         self.root = os.path.join(self.root, 'VOCdevkit/VOC2012')
         if self.split == "val":
-            file_list = os.path.join("dataloaders/voc_splits", f"{self.split}" + ".txt")
+            file_list = os.path.join("CCT/dataloaders/voc_splits", f"{self.split}" + ".txt")
         elif self.split in ["train_supervised", "train_unsupervised"]:
-            file_list = os.path.join("dataloaders/voc_splits", f"{self.n_labeled_examples}_{self.split}" + ".txt")
+            file_list = os.path.join("CCT/dataloaders/voc_splits", f"{self.n_labeled_examples}_{self.split}" + ".txt")
         else:
             raise ValueError(f"Invalid split name {self.split}")
 
