@@ -22,7 +22,7 @@ class BaseTrainer:
 
         # SETTING THE DEVICE
         self.device, availble_gpus = self._get_available_devices(self.config['n_gpu'])
-        self.model = torch.nn.DataParallel(self.model, device_ids=availble_gpus)
+        #self.model = torch.nn.DataParallel(self.model, device_ids=availble_gpus)
         self.model.to(self.device)
 
         # CONFIGS
