@@ -82,7 +82,7 @@ def main():
     model = models.CCT(num_classes=num_classes,
                         conf=config['model'], testing=True)
     checkpoint = torch.load(args.model)
-    model = torch.nn.DataParallel(model)
+    #model = torch.nn.DataParallel(model)
     try:
         model.load_state_dict(checkpoint['state_dict'], strict=True)
     except Exception as e:
