@@ -97,7 +97,7 @@
     },
 
     "trainer": {
-        "epochs": 30,
+        "epochs": 20,
         "save_dir": "saved/",
         "save_period": 5,
   
