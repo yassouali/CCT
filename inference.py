@@ -78,7 +78,7 @@ def main():
     palette = get_voc_pallete(num_classes)
 
     # MODEL
-    config['model']['supervised'] = True; config['model']['semi'] = False
+    config['model']['supervised'] = False; config['model']['semi'] = True
     model = models.CCT(num_classes=num_classes,
                         conf=config['model'], testing=True)
     checkpoint = torch.load(args.model)
