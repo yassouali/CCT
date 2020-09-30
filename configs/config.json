@@ -89,7 +89,7 @@
 
     "val_loader": {
         "data_dir": "CCT/Data",
-        "batch_size": 10,
+        "batch_size": 1,
         "val": true,
         "split": "val",
         "shuffle": false,
