@@ -2,7 +2,7 @@
     "name": "CCT",
     "experim_name": "CCT",
     "n_gpu": 1,
-    "n_labeled_examples": 1000,
+    "n_labeled_examples": 1464,
     "diff_lrs": true,
     "ramp_up": 0.1,
     "unsupervised_w": 30,
@@ -89,17 +89,17 @@
 
     "val_loader": {
         "data_dir": "CCT/Data",
-        "batch_size": 1,
+        "batch_size": 10,
         "val": true,
         "split": "val",
         "shuffle": false,
-        "num_workers": 4
+        "num_workers": 8
     },
 
     "trainer": {
-        "epochs": 5,
+        "epochs": 30,
         "save_dir": "saved/",
-        "save_period": 2,
+        "save_period": 5,
   
         "monitor": "max Mean_IoU",
         "early_stop": 10,
@@ -109,6 +109,6 @@
         "log_per_iter": 20,
 
         "val": true,
-        "val_per_epochs": 2
+        "val_per_epochs": 10
     }
 }
