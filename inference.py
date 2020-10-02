@@ -118,6 +118,7 @@ def parse_arguments():
                         help='Path to the config file')
     parser.add_argument( '--model', default=None, type=str,
                         help='Path to the trained .pth model')
+    parser.add_argument( '--save', action='store_true', help='Save images')
     parser.add_argument('--images', default="/home/yassine/Datasets/vision/PascalVoc/VOC/VOCdevkit/VOC2012/test_images", type=str,
                         help='Test images for Pascal VOC')
     args = parser.parse_args()
