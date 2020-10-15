@@ -95,6 +95,11 @@ class FocalLoss(nn.Module):
         idx = target.cpu().long()
 
         one_hot_key = torch.FloatTensor(target.size(0), num_class).zero_()
+	
+	# to resolve error in idx in scatter_
+	for i in range(idx.size(0)):
+	    if idx[i] == 255:
+	        idx[i] = 0
         one_hot_key = one_hot_key.scatter_(1, idx, 1)
         if one_hot_key.device != logit.device:
             one_hot_key = one_hot_key.to(logit.device)
