@@ -8,7 +8,7 @@ from utils.helpers import set_trainable
 from utils.losses import *
 from models.decoders import *
 from models.encoder import Encoder
-from utils.losses import CE_loss
+from utils.losses import CE_loss, FocalLoss
 
 class CCT(BaseModel):
     def __init__(self, num_classes, conf, sup_loss=None, cons_w_unsup=None, ignore_index=None, testing=False,
@@ -97,6 +97,8 @@ class CCT(BaseModel):
         # Supervised loss
         if self.sup_type == 'CE':
             loss_sup = self.sup_loss(output_l, target_l, ignore_index=self.ignore_index, temperature=self.softmax_temp) * self.sup_loss_w
+        elif self.sup_type == 'FL':
+            loss_sup = self.sup_loss(output_l,target_l) * self.sup_loss_w
         else:
             loss_sup = self.sup_loss(output_l, target_l, curr_iter=curr_iter, epoch=epoch, ignore_index=self.ignore_index) * self.sup_loss_w
 
