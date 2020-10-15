@@ -81,7 +81,7 @@ class FocalLoss(nn.Module):
             assert len(alpha) == num_class
             alpha = torch.FloatTensor(alpha).view(num_class, 1)
             alpha = alpha / alpha.sum()
-	    alpha = 1/alpha # inverse of class frequency
+			alpha = 1/alpha # inverse of class frequency
         elif isinstance(alpha, float):
             alpha = torch.ones(num_class, 1)
             alpha = alpha * (1 - self.alpha)
