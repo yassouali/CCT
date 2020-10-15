@@ -8,21 +8,11 @@ import math
 from utils import Logger
 from trainer import Trainer
 import torch.nn.functional as F
-from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss
+from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, softmax_helper
 
 def get_instance(module, name, config, *args):
     # GET THE CORRESPONDING CLASS / FCT 
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
-
-# for FocalLoss
-def softmax_helper(x):
-    # copy from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunet/utilities/nd_softmax.py
-    rpt = [1 for _ in range(len(x.size()))]
-    rpt[1] = x.size(1)
-    x_max = x.max(1, keepdim=True)[0].repeat(*rpt)
-    e_x = torch.exp(x - x_max)
-    return e_x / e_x.sum(1, keepdim=True).repeat(*rpt)
-    
 
 def main(config, resume):
     torch.manual_seed(42)
