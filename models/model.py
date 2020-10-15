@@ -8,7 +8,7 @@ from utils.helpers import set_trainable
 from utils.losses import *
 from models.decoders import *
 from models.encoder import Encoder
-from utils.losses import CE_loss, FocalLoss
+from utils.losses import CE_loss
 
 class CCT(BaseModel):
     def __init__(self, num_classes, conf, sup_loss=None, cons_w_unsup=None, ignore_index=None, testing=False,
