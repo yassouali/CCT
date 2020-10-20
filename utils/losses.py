@@ -183,7 +183,7 @@ class abCE_loss(nn.Module):
 
 def softmax_mse_loss(inputs, targets, conf_mask=False, threshold=None, use_softmax=False):
     assert inputs.requires_grad == True and targets.requires_grad == False
-    assert inputs.size() == targets.size()
+    assert inputs.size() == targets.size() # (batch_size * num_classes * H * W)
     inputs = F.softmax(inputs, dim=1)
     if use_softmax:
         targets = F.softmax(targets, dim=1)
@@ -195,7 +195,7 @@ def softmax_mse_loss(inputs, targets, conf_mask=False, threshold=None, use_softm
         if loss_mat.shape.numel() == 0: loss_mat = torch.tensor([0.]).to(inputs.device)
         return loss_mat.mean()
     else:
-        return F.mse_loss(inputs, targets, reduction='mean')
+        return F.mse_loss(inputs, targets, reduction='mean') # take the mean over the batch_size
 
 
 def softmax_kl_loss(inputs, targets, conf_mask=False, threshold=None, use_softmax=False):
