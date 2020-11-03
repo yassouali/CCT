@@ -41,9 +41,19 @@ def main(config, resume):
     if config['model']['sup_loss'] == 'CE':
         sup_loss = CE_loss
     elif config['model']['sup_loss'] == 'FL':
-        # pixelcount = [list of pixelcount per object class]
-        # pixelcount = [44502000, 49407, 1279000, 969250]
-        # need to write a function to count pixels
+        num_classes = 4
+        pixelcount = [0 for i in range(num_classes)]
+        for image_batch, label_batch in supervised_loader:
+            for label in label_batch.data:
+                label[label==255] = 0 # assign ignore labels to background class is these are not part of the classes
+                l_unique = torch.unique(label)
+                list_unique = [element.item() for element in l_unique.flatten()]
+                l_unique_count = torch.stack([(label==x).sum() for x in l_unique])
+                list_count = [count.item() for count in l_unqiue_count.flatten()]
+                for index in list_unique:
+                    pixelcount[index] += list_count[list_unique.index(index)]
+        print(labelcount) # [46085486, 45121, 848649, 824136] # list of class occurrences
+                                       
         sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = pixelcount, gamma = 2, smooth = 1e-5)
     else:
         sup_loss = abCE_loss(iters_per_epoch=iter_per_epoch, epochs=config['trainer']['epochs'],
