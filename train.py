@@ -8,7 +8,7 @@ import math
 from utils import Logger
 from trainer import Trainer
 import torch.nn.functional as F
-from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, get_alpha
+from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, softmax_helper, get_alpha
 
 def get_instance(module, name, config, *args):
     # GET THE CORRESPONDING CLASS / FCT 
