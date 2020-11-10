@@ -30,6 +30,35 @@ class consistency_weight(object):
 def CE_loss(input_logits, target_targets, ignore_index, temperature=1):
     return F.cross_entropy(input_logits/temperature, target_targets, ignore_index=ignore_index)
 
+# for FocalLoss
+def softmax_helper(x):
+    # copy from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunet/utilities/nd_softmax.py
+    rpt = [1 for _ in range(len(x.size()))]
+    rpt[1] = x.size(1)
+    x_max = x.max(1, keepdim=True)[0].repeat(*rpt)
+    e_x = torch.exp(x - x_max)
+    return e_x / e_x.sum(1, keepdim=True).repeat(*rpt)
+
+def get_alpha(supervised_loader):
+    # get number of classes
+    num_labels = 0
+    for image_batch, label_batch in supervised_loader:
+        label_batch.data[label_batch.data==255] = 0 # pixels of ignore class added to background
+        l_unique = torch.unique(label_batch.data)
+        list_unique = [element.item() for element in l_unique.flatten()]
+        num_labels = max(max(list_unique),num_labels)
+    num_classes = num_labels + 1
+    # count class occurrences
+    alpha = [0 for i in range(num_classes)]
+    for image_batch, label_batch in supervised_loader:
+        label_batch.data[label_batch.data==255] = 0 # pixels of ignore class added to background
+        l_unique = torch.unique(label_batch.data)
+        list_unique = [element.item() for element in l_unique.flatten()]
+        l_unique_count = torch.stack([(label_batch.data==x_u).sum() for x_u in l_unique]) # tensor([65920, 36480])
+        list_count = [count.item() for count in l_unique_count.flatten()]
+        for index in list_unique:
+            alpha[index] += list_count[list_unique.index(index)]
+    return alpha
 
 # for FocalLoss
 def softmax_helper(x):
@@ -81,8 +110,7 @@ class FocalLoss(nn.Module):
             logit = logit.view(-1, logit.size(-1))
         target = torch.squeeze(target, 1)
         target = target.view(-1, 1)
-        # print(logit.shape, target.shape)
-        # 
+	
         alpha = self.alpha
 
         if alpha is None:
@@ -91,7 +119,7 @@ class FocalLoss(nn.Module):
             assert len(alpha) == num_class
             alpha = torch.FloatTensor(alpha).view(num_class, 1)
             alpha = alpha / alpha.sum()
-			alpha = 1/alpha # inverse of class frequency
+	    alpha = 1/alpha # inverse of class frequency
         elif isinstance(alpha, float):
             alpha = torch.ones(num_class, 1)
             alpha = alpha * (1 - self.alpha)
@@ -108,9 +136,8 @@ class FocalLoss(nn.Module):
         one_hot_key = torch.FloatTensor(target.size(0), num_class).zero_()
 	
 	# to resolve error in idx in scatter_
-	for i in range(idx.size(0)):
-	    if idx[i] == 255:
-	        idx[i] = 0
+	idx[idx==225]=0
+        
         one_hot_key = one_hot_key.scatter_(1, idx, 1)
         if one_hot_key.device != logit.device:
             one_hot_key = one_hot_key.to(logit.device)
@@ -193,7 +220,7 @@ class abCE_loss(nn.Module):
 
 def softmax_mse_loss(inputs, targets, conf_mask=False, threshold=None, use_softmax=False):
     assert inputs.requires_grad == True and targets.requires_grad == False
-    assert inputs.size() == targets.size()
+    assert inputs.size() == targets.size() # (batch_size * num_classes * H * W)
     inputs = F.softmax(inputs, dim=1)
     if use_softmax:
         targets = F.softmax(targets, dim=1)
@@ -205,7 +232,7 @@ def softmax_mse_loss(inputs, targets, conf_mask=False, threshold=None, use_softm
         if loss_mat.shape.numel() == 0: loss_mat = torch.tensor([0.]).to(inputs.device)
         return loss_mat.mean()
     else:
-        return F.mse_loss(inputs, targets, reduction='mean')
+        return F.mse_loss(inputs, targets, reduction='mean') # take the mean over the batch_size
 
 
 def softmax_kl_loss(inputs, targets, conf_mask=False, threshold=None, use_softmax=False):

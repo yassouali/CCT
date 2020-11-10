@@ -8,7 +8,8 @@ import math
 from utils import Logger
 from trainer import Trainer
 import torch.nn.functional as F
-from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, softmax_helper
+from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, softmax_helper, get_alpha
+
 
 def get_instance(module, name, config, *args):
     # GET THE CORRESPONDING CLASS / FCT 
@@ -31,10 +32,8 @@ def main(config, resume):
     if config['model']['sup_loss'] == 'CE':
         sup_loss = CE_loss
     elif config['model']['sup_loss'] == 'FL':
-        # pixelcount = [list of pixelcount per object class]
-        # pixelcount = [44502000, 49407, 1279000, 969250]
-        # need to write a function to count pixels
-        sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = pixelcount, gamma = 2, smooth = 1e-5)
+        alpha = get_alpha(supervised_loader) # calculare class occurences
+        sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = alpha, gamma = 2, smooth = 1e-5)
     else:
         sup_loss = abCE_loss(iters_per_epoch=iter_per_epoch, epochs=config['trainer']['epochs'],
                                 num_classes=val_loader.dataset.num_classes)
