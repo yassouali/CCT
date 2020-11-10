@@ -30,6 +30,26 @@ class consistency_weight(object):
 def CE_loss(input_logits, target_targets, ignore_index, temperature=1):
     return F.cross_entropy(input_logits/temperature, target_targets, ignore_index=ignore_index)
 
+def get_alpha(supervised_loader):
+    # get number of classes
+    num_labels = 0
+    for image_batch, label_batch in supervised_loader:
+        label_batch.data[label_batch.data==255] = 0 # pixels of ignore class added to background
+        l_unique = torch.unique(label_batch.data)
+        list_unique = [element.item() for element in l_unique.flatten()]
+        num_labels = max(max(list_unique),num_labels)
+    num_classes = num_labels + 1
+    # count class occurrences
+    alpha = [0 for i in range(num_classes)]
+    for image_batch, label_batch in supervised_loader:
+        label_batch.data[label_batch.data==255] = 0 # pixels of ignore class added to background
+        l_unique = torch.unique(label_batch.data)
+        list_unique = [element.item() for element in l_unique.flatten()]
+        l_unique_count = torch.stack([(label_batch.data==x_u).sum() for x_u in l_unique]) # tensor([65920, 36480])
+        list_count = [count.item() for count in l_unique_count.flatten()]
+        for index in list_unique:
+            alpha[index] += list_count[list_unique.index(index)]
+    return alpha
 
 class FocalLoss(nn.Module):
     """
@@ -71,8 +91,7 @@ class FocalLoss(nn.Module):
             logit = logit.view(-1, logit.size(-1))
         target = torch.squeeze(target, 1)
         target = target.view(-1, 1)
-        # print(logit.shape, target.shape)
-        # 
+	
         alpha = self.alpha
 
         if alpha is None:
@@ -81,7 +100,7 @@ class FocalLoss(nn.Module):
             assert len(alpha) == num_class
             alpha = torch.FloatTensor(alpha).view(num_class, 1)
             alpha = alpha / alpha.sum()
-			alpha = 1/alpha # inverse of class frequency
+	    alpha = 1/alpha # inverse of class frequency
         elif isinstance(alpha, float):
             alpha = torch.ones(num_class, 1)
             alpha = alpha * (1 - self.alpha)
@@ -98,9 +117,8 @@ class FocalLoss(nn.Module):
         one_hot_key = torch.FloatTensor(target.size(0), num_class).zero_()
 	
 	# to resolve error in idx in scatter_
-	for i in range(idx.size(0)):
-	    if idx[i] == 255:
-	        idx[i] = 0
+	idx[idx==225]=0
+        
         one_hot_key = one_hot_key.scatter_(1, idx, 1)
         if one_hot_key.device != logit.device:
             one_hot_key = one_hot_key.to(logit.device)
