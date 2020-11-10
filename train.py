@@ -8,7 +8,7 @@ import math
 from utils import Logger
 from trainer import Trainer
 import torch.nn.functional as F
-from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss
+from utils.losses import abCE_loss, CE_loss, consistency_weight, FocalLoss, get_alpha
 
 def get_instance(module, name, config, *args):
     # GET THE CORRESPONDING CLASS / FCT 
@@ -41,19 +41,8 @@ def main(config, resume):
     if config['model']['sup_loss'] == 'CE':
         sup_loss = CE_loss
     elif config['model']['sup_loss'] == 'FL':
-        # count label occurences per pixel
-        num_classes = 4
-        alfa = [0 for i in range(num_classes)]
-        for image_batch, label_batch in supervised_loader:
-            label_batch.data[label_batch.data==255] = 0 # pixels of ignore class added to background
-            l_unique = torch.unique(label_batch.data) # gather unique labels
-            list_unique = [element.item() for element in l_unique.flatten()] # put unique labels in list
-            l_unique_count = torch.stack([(label_batch.data==x_u).sum() for x_u in l_unique]) # count unique labels
-            list_count = [count.item() for count in l_unique_count.flatten()] # put counts in list
-            for index in list_unique:
-                alfa[index] += list_count[list_unique.index(index)] # add counts to right index in alfa
-        print(alfa) # [46085486, 45121, 848649, 824136] # list of class occurrences
-        sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = alfa, gamma = 2, smooth = 1e-5)
+        alpha = get_alpha(supervised_loader) # calculare class occurences
+        sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = alpha, gamma = 2, smooth = 1e-5)
     else:
         sup_loss = abCE_loss(iters_per_epoch=iter_per_epoch, epochs=config['trainer']['epochs'],
                                 num_classes=val_loader.dataset.num_classes)
