@@ -1,3 +1,4 @@
+
 {
     "name": "CCT",
     "experim_name": "CCT",
@@ -59,9 +60,9 @@
     "train_supervised": {
         "data_dir": "CCT/Data",
         "batch_size": 10,
-        "crop_size": 160,
+        "crop_size": 320,
         "shuffle": true,
-        "base_size": 200,
+        "base_size": 400,
         "scale": true,
         "augment": true,
         "flip": true,
@@ -75,9 +76,9 @@
         "data_dir": "CCT/Data",
         "weak_labels_output": "pseudo_labels/result/pseudo_labels",
         "batch_size": 10,
-        "crop_size": 160,
+        "crop_size": 320,
         "shuffle": true,
-        "base_size": 200,
+        "base_size": 400,
         "scale": true,
         "augment": true,
         "flip": true,
@@ -93,11 +94,11 @@
         "val": true,
         "split": "val",
         "shuffle": false,
-        "num_workers": 8
+        "num_workers": 4
     },
 
     "trainer": {
-        "epochs": 60,
+        "epochs": 20,
         "save_dir": "saved/",
         "save_period": 5,
   
@@ -109,6 +110,6 @@
         "log_per_iter": 20,
 
         "val": true,
-        "val_per_epochs": 10
+        "val_per_epochs": 5
     }
 }
