@@ -10,10 +10,11 @@ def get_instance(module, name, config, *args):
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
 
 class BaseTrainer:
-    def __init__(self, model, resume, config, iters_per_epoch, train_logger=None):
+    def __init__(self, model, resume, config, iters_per_epoch, val_logger=None, train_logger=None):
         self.model = model
         self.config = config
 
+        self.val_logger = val_logger
         self.train_logger = train_logger
         self.logger = logging.getLogger(self.__class__.__name__)
         self.do_validation = self.config['trainer']['val']
@@ -88,16 +89,23 @@ class BaseTrainer:
 
     def train(self):
         for epoch in range(self.start_epoch, self.epochs+1):
-            results = self._train_epoch(epoch)
+            
+            train_results = self._train_epoch(epoch)
+            train_results.update((k, str(v)) for k, v in train_results.items())
+            
             if self.do_validation and epoch % self.config['trainer']['val_per_epochs'] == 0:
-                results = self._valid_epoch(epoch)
+                val_results = self._valid_epoch(epoch)
                 self.logger.info('\n\n')
-                for k, v in results.items():
+                for k, v in val_results..items():
                     self.logger.info(f'         {str(k):15s}: {v}')
+                    
+                val_results.update((k, str(v)) for k, v in val_results.items())
+                val_log = {'epoch' : epoch, **val_results}
+                self.val_logger.add_entry(val_log)
             
             if self.train_logger is not None:
-                log = {'epoch' : epoch, **results}
-                self.train_logger.add_entry(log)
+                train_log = {'epoch' : epoch, **train_results}
+                self.train_logger.add_entry(train_log)
 
             # CHECKING IF THIS IS THE BEST MODEL (ONLY FOR VAL)
             if self.mnt_mode != 'off' and epoch % self.config['trainer']['val_per_epochs'] == 0:
@@ -122,8 +130,20 @@ class BaseTrainer:
             # SAVE CHECKPOINT
             if epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=self.improved)
+                
+            #SAVE TRAINING AND VALIDATION RESULTS
+            self._save_train_val_logs(self.train_logger, self.val_logger)
         self.html_results.save()
-
+        
+    def _save_train_val_logs(self, train_logger, val_logger):
+        epoch_results = {"train_results": train_logger.entries,
+                         "val_results": val_logger.entries
+        }
+      
+        filename = os.path.join(self.checkpoint_dir, f'train_val_results.json')
+        self.logger.info(f'\nSaving a epoch results: {filename} ...')
+        with open(filename, "w") as f:
+            json.dump(epoch_results, f,indent=4, sort_keys=True)
 
     def _save_checkpoint(self, epoch, save_best=False):
         state = {
