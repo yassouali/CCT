@@ -244,19 +244,19 @@ class Trainer(BaseTrainer):
     def _log_values(self, cur_losses):
         logs = {}
         if "loss_sup" in cur_losses.keys():
-            logs['loss_sup'] = self.loss_sup.average
+            logs['loss_sup'] = round(self.loss_sup.average, 4)
         if "loss_unsup" in cur_losses.keys():
-            logs['loss_unsup'] = self.loss_unsup.average
+            logs['loss_unsup'] = round(self.loss_unsup.average, 4)
         if "loss_weakly" in cur_losses.keys():
-            logs['loss_weakly'] = self.loss_weakly.average
+            logs['loss_weakly'] = round(self.loss_weakly.average, 4)
         if "pair_wise" in cur_losses.keys():
-            logs['pair_wise'] = self.pair_wise.average
+            logs['pair_wise'] = round(self.pair_wise.average, 4)
 
-        logs['mIoU_labeled'] = self.mIoU_l
-        logs['pixel_acc_labeled'] = self.pixel_acc_l
+        logs['mIoU_labeled'] = round(self.mIoU_l, 3)
+        logs['pixel_acc_labeled'] = round(self.pixel_acc_l, 4)
         if self.mode == 'semi':
-            logs['mIoU_unlabeled'] = self.mIoU_ul
-            logs['pixel_acc_unlabeled'] = self.pixel_acc_ul
+            logs['mIoU_unlabeled'] = round(self.mIoU_ul, 4)
+            logs['pixel_acc_unlabeled'] = round(self.pixel_acc_ul, 4)
         return logs
 
 
