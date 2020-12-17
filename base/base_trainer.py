@@ -96,7 +96,7 @@ class BaseTrainer:
             if self.do_validation and epoch % self.config['trainer']['val_per_epochs'] == 0:
                 val_results = self._valid_epoch(epoch)
                 self.logger.info('\n\n')
-                for k, v in val_results..items():
+                for k, v in val_results.items():
                     self.logger.info(f'         {str(k):15s}: {v}')
                     
                 val_results.update((k, str(v)) for k, v in val_results.items())
