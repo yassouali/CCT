@@ -17,8 +17,8 @@ from utils.helpers import DeNormalize
 
 class Trainer(BaseTrainer):
     def __init__(self, model, resume, config, supervised_loader, unsupervised_loader, iter_per_epoch,
-                val_loader=None, train_logger=None):
-        super(Trainer, self).__init__(model, resume, config, iter_per_epoch, train_logger)
+                val_loader=None, val_logger=None, train_logger=None):
+        super(Trainer, self).__init__(model, resume, config, iter_per_epoch, val_logger, train_logger)
         
         self.supervised_loader = supervised_loader
         self.unsupervised_loader = unsupervised_loader
