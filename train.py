@@ -14,7 +14,7 @@ def get_instance(module, name, config, *args):
     # GET THE CORRESPONDING CLASS / FCT 
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
 
-def main(config, resume):
+def main(config, resume, epoch_logs):
     torch.manual_seed(42)
     val_logger = Logger()
     train_logger = Logger()
