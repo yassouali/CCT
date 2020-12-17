@@ -16,7 +16,16 @@ def get_instance(module, name, config, *args):
 
 def main(config, resume):
     torch.manual_seed(42)
+    val_logger = Logger()
     train_logger = Logger()
+    
+    if epoch_logs:
+        epoch_logs = json.load(open(epoch_logs))
+        train_logger.entries = epoch_logs["train_results"]
+        val_logger.entries = epoch_logs["val_results"]
+
+    del epoch_logs
+
 
     # DATA LOADERS
     config['train_supervised']['n_labeled_examples'] = config['n_labeled_examples']
@@ -54,6 +63,7 @@ def main(config, resume):
         unsupervised_loader=unsupervised_loader,
         val_loader=val_loader,
         iter_per_epoch=iter_per_epoch,
+        val_logger=val_logger,
         train_logger=train_logger)
 
     trainer.train()
@@ -67,9 +77,11 @@ if __name__=='__main__':
                         help='Path to the .pth model checkpoint to resume training')
     parser.add_argument('-d', '--device', default=None, type=str,
                            help='indices of GPUs to enable (default: all)')
+    parser.add_argument('-l', '--logs', default=None, type=str,
+                           help='path to .json contain train and validation results')
     parser.add_argument('--local', action='store_true', default=False)
     args = parser.parse_args()
 
     config = json.load(open(args.config))
     torch.backends.cudnn.benchmark = True
-    main(config, args.resume)
+    main(config, args.resume, args.logs)
