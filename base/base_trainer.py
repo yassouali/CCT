@@ -110,14 +110,14 @@ class BaseTrainer:
             # CHECKING IF THIS IS THE BEST MODEL (ONLY FOR VAL)
             if self.mnt_mode != 'off' and epoch % self.config['trainer']['val_per_epochs'] == 0:
                 try:
-                    if self.mnt_mode == 'min': self.improved = (log[self.mnt_metric] < self.mnt_best)
-                    else: self.improved = (log[self.mnt_metric] > self.mnt_best)
+                    if self.mnt_mode == 'min': self.improved = (train_log[self.mnt_metric] < self.mnt_best)
+                    else: self.improved = (train_log[self.mnt_metric] > self.mnt_best)
                 except KeyError:
                     self.logger.warning(f'The metrics being tracked ({self.mnt_metric}) has not been calculated. Training stops.')
                     break
                     
                 if self.improved:
-                    self.mnt_best = log[self.mnt_metric]
+                    self.mnt_best = train_log[self.mnt_metric]
                     self.not_improved_count = 0
                 else:
                     self.not_improved_count += 1
