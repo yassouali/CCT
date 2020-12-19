@@ -66,7 +66,8 @@ class Trainer(BaseTrainer):
             else:
                 (input_l, target_l), (input_ul, target_ul) = next(dataloader)
                 target_ul = target_ul.cuda(non_blocking=True)
-                input_ul_mix = mix_image.generate_cutmix_images(input_ul).cuda(non_blocking=True)
+                input_ul_mix = mix_image.generate_cutmix_images(input_ul)
+                input_ul_mix = input_ul_mix.cuda(non_blocking=True)
 
             input_l, target_l = input_l.cuda(non_blocking=True), target_l.cuda(non_blocking=True)
             
