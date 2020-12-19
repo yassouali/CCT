@@ -24,6 +24,9 @@ class Trainer(BaseTrainer):
         self.supervised_loader = supervised_loader
         self.unsupervised_loader = unsupervised_loader
         self.val_loader = val_loader
+        
+        self.cutmix_param = config['cutmix']
+        mix_image = CutMix(self.cutmix_param)
 
         self.ignore_index = self.val_loader.dataset.ignore_index
         self.wrt_mode, self.wrt_step = 'train_', 0
