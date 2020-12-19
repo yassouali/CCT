@@ -12,6 +12,7 @@ from utils.metrics import eval_metrics, AverageMeter
 from tqdm import tqdm
 from PIL import Image
 from utils.helpers import DeNormalize
+from utils.cutmix import CutMix
 
 
 
@@ -64,12 +65,15 @@ class Trainer(BaseTrainer):
                 (input_l, target_l), (input_ul, target_ul) = next(dataloader), (None, None)
             else:
                 (input_l, target_l), (input_ul, target_ul) = next(dataloader)
-                input_ul, target_ul = input_ul.cuda(non_blocking=True), target_ul.cuda(non_blocking=True)
+                target_ul = target_ul.cuda(non_blocking=True)
+                input_ul_mix = mix_image.generate_cutmix_images(input_ul).cuda(non_blocking=True)
 
             input_l, target_l = input_l.cuda(non_blocking=True), target_l.cuda(non_blocking=True)
+            
+            
             self.optimizer.zero_grad()
 
-            total_loss, cur_losses, outputs = self.model(x_l=input_l, target_l=target_l, x_ul=input_ul,
+            total_loss, cur_losses, outputs = self.model(x_l=input_l, target_l=target_l, x_ul=input_ul_mix,
                                                         curr_iter=batch_idx, target_ul=target_ul, epoch=epoch-1)
             total_loss = total_loss.mean()
             total_loss.backward()
