@@ -45,6 +45,10 @@
         "feature_noise": 6,
         "uniform_range": 0.3
     },
+    "cutmix":{
+        "beta": 0.5,
+        "cutmix_prob": 0.8
+    }, 
 
 
     "optimizer": {
