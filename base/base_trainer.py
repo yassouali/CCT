@@ -141,9 +141,9 @@ class BaseTrainer:
         }
       
         filename = os.path.join(self.checkpoint_dir, f'train_val_results.json')
-        self.logger.info(f'\nSaving a epoch results: {filename} ...')
+        self.logger.info(f'\nSaving epoch results: {filename} ...')
         with open(filename, "w") as f:
-            json.dump(epoch_results, f,indent=4, sort_keys=True)
+            json.dump(epoch_results, f,indent=4)
 
     def _save_checkpoint(self, epoch, save_best=False):
         state = {
