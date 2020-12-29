@@ -5,7 +5,7 @@
     "n_gpu": 1,
     "n_labeled_examples": 1464,
     "diff_lrs": true,
-    "ramp_up": 0.1,
+    "ramp_up": 0.4,
     "unsupervised_w": 30,
     "ignore_index": 255,
     "lr_scheduler": "Poly",
