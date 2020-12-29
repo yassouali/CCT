@@ -36,7 +36,7 @@ class abCE_loss(nn.Module):
     Annealed-Bootstrapped cross-entropy loss
     """
     def __init__(self, iters_per_epoch, epochs, num_classes, weight=None,
-                        reduction='mean', thresh=0.7, min_kept=1, ramp_type='log_rampup'):
+                        reduction='mean', thresh=0.9, min_kept=1, ramp_type='log_rampup'):
         super(abCE_loss, self).__init__()
         self.weight = torch.FloatTensor(weight) if weight is not None else weight
         self.reduction = reduction
