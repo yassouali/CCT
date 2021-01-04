@@ -11,7 +11,7 @@ from models.encoder import Encoder
 
 
 class CCT(BaseModel):
-    def __init__(self, num_classes, conf, sup_loss=None, cons_w_unsup=None, ignore_index=None, testing=False,
+    def __init__(self, num_classes, conf, cutmix_conf, sup_loss=None, cons_w_unsup=None, ignore_index=None, testing=False,
             pretrained=True, use_weak_lables=False, weakly_loss_w=0.4):
 
         if not testing:
