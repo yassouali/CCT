@@ -257,4 +257,19 @@ class ObjectMaskingDecoder(nn.Module):
         x_masked_obj = self.upsample(x_masked_obj)
 
         return x_masked_obj
+    
+class CutMixDecoder(nn.Module):
+
+    def __init__(self, upscale, conv_in_ch, num_classes, cutmix_conf):
+        super(CutMixDecoder, self).__init__()
+        self.mix_image = CutMix(cutmix_conf)
+        self.upscale = upscale
+        self.upsample = upsample(conv_in_ch, num_classes, upscale=upscale)
+    
+    def forward(self, x, pred=None):
+        x = self.mix_image.generate_cutmix_images(x.clone())
+
+        x = self.upsample(x)
+
+        return x
 
