@@ -18,7 +18,7 @@
         "semi": true,
         "supervised_w": 1,
 
-        "sup_loss": "ABCE",
+        "sup_loss": "CE",
         "un_loss": "MSE",
 
         "softmax_temp": 1,
