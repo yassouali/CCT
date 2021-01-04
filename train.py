@@ -49,6 +49,7 @@ def main(config, resume, epoch_logs):
                                         rampup_ends=rampup_ends)
 
     model = models.CCT(num_classes=val_loader.dataset.num_classes, conf=config['model'],
+                            cutmix_conf=config["cutmix"],
     						sup_loss=sup_loss, cons_w_unsup=cons_w_unsup,
     						weakly_loss_w=config['weakly_loss_w'], use_weak_lables=config['use_weak_lables'],
                             ignore_index=val_loader.dataset.ignore_index)
