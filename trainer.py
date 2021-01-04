@@ -72,7 +72,7 @@ class Trainer(BaseTrainer):
                 target_ul = target_ul.cuda(non_blocking=True)
                 input_ul_mix = self.mix_image.generate_cutmix_images(input_ul)
                 input_ul = input_ul_mix.cuda(non_blocking=True)
-                del input_ul
+                del input_ul_mix
 
             input_l, target_l = input_l.cuda(non_blocking=True), target_l.cuda(non_blocking=True)
             
