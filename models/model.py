@@ -78,9 +78,20 @@ class CCT(BaseModel):
             feature_noise = [FeatureNoiseDecoder(upscale, decoder_in_ch, num_classes,
             							uniform_range=conf['uniform_range'])
             							for _ in range(conf['feature_noise'])]
+            if cutmix_conf["cutmix_masking"] > 0:
 
-            self.aux_decoders = nn.ModuleList([*vat_decoder, *drop_decoder, *cut_decoder,
-                                    *context_m_decoder, *object_masking, *feature_drop, *feature_noise])
+                cutmix_decoder = [CutMixDecoder(upscale, decoder_in_ch, num_classes, cutmix_conf)
+            							for _ in range(cutmix_conf['cutmix_masking'])]
+
+                self.aux_decoders = nn.ModuleList([*vat_decoder, *drop_decoder, *cut_decoder,
+                                    *context_m_decoder, *object_masking, *feature_drop,
+                                     *feature_noise, *cutmix_decoder])
+            else:
+   
+                self.aux_decoders = nn.ModuleList([*vat_decoder, *drop_decoder, *cut_decoder,
+                                    *context_m_decoder, *object_masking, *feature_drop, 
+                                    *feature_noise])
+
 
     def forward(self, x_l=None, target_l=None, x_ul=None, target_ul=None, curr_iter=None, epoch=None):
         if not self.training:
