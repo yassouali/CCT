@@ -119,7 +119,7 @@ class FocalLoss(nn.Module):
             assert len(alpha) == num_class
             alpha = torch.FloatTensor(alpha).view(num_class, 1)
             alpha = alpha / alpha.sum()
-	    alpha = 1/alpha # inverse of class frequency
+            alpha = 1/alpha # inverse of class frequency
         elif isinstance(alpha, float):
             alpha = torch.ones(num_class, 1)
             alpha = alpha * (1 - self.alpha)
@@ -135,8 +135,8 @@ class FocalLoss(nn.Module):
 
         one_hot_key = torch.FloatTensor(target.size(0), num_class).zero_()
 	
-	# to resolve error in idx in scatter_
-	idx[idx==225]=0
+        # to resolve error in idx in scatter_
+        idx[idx==225]=0
         
         one_hot_key = one_hot_key.scatter_(1, idx, 1)
         if one_hot_key.device != logit.device:
