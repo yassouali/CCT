@@ -85,7 +85,7 @@ class FocalLoss(nn.Module):
     :param size_average: (bool, optional) By default, the losses are averaged over each loss element in the batch.
     """
 
-    def __init__(self, apply_nonlin=None, alpha=None, gamma=2, balance_index=0, smooth=1e-5, size_average=True):
+    def __init__(self, apply_nonlin=None, ignore_index = None, alpha=None, gamma=2, balance_index=0, smooth=1e-5, size_average=True):
         super(FocalLoss, self).__init__()
         self.apply_nonlin = apply_nonlin
         self.alpha = alpha
@@ -110,6 +110,11 @@ class FocalLoss(nn.Module):
             logit = logit.view(-1, logit.size(-1))
         target = torch.squeeze(target, 1)
         target = target.view(-1, 1)
+	
+	valid_mask = None
+	if self.ignore_index is not None:
+            valid_mask = target != self.ignore_index
+            target = target * valid_mask
 	
         alpha = self.alpha
 
@@ -153,7 +158,10 @@ class FocalLoss(nn.Module):
         alpha = alpha[idx]
         alpha = torch.squeeze(alpha)
         loss = -1 * alpha * torch.pow((1 - pt), gamma) * logpt
-
+	
+        if valid_mask is not None:
+            loss = loss * valid_mask.squeeze()
+        
         if self.size_average:
             loss = loss.mean()
         else:
