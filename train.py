@@ -33,7 +33,7 @@ def main(config, resume):
         sup_loss = CE_loss
     elif config['model']['sup_loss'] == 'FL':
         alpha = get_alpha(supervised_loader) # calculare class occurences
-        sup_loss = FocalLoss(apply_nonlin = softmax_helper, alpha = alpha, gamma = 2, smooth = 1e-5)
+        sup_loss = FocalLoss(apply_nonlin = softmax_helper, ignore_index = config['ignore_index'], alpha = alpha, gamma = 2, smooth = 1e-5)
     else:
         sup_loss = abCE_loss(iters_per_epoch=iter_per_epoch, epochs=config['trainer']['epochs'],
                                 num_classes=val_loader.dataset.num_classes)
