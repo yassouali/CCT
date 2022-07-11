@@ -61,7 +61,8 @@ class BaseDataSet(Dataset):
         center = (w / 2, h / 2)
         rot_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
         image = cv2.warpAffine(image, rot_matrix, (w, h), flags=cv2.INTER_CUBIC)  # , borderMode=cv2.BORDER_REFLECT)
-        label = cv2.warpAffine(label, rot_matrix, (w, h), flags=cv2.INTER_NEAREST)  # ,  borderMode=cv2.BORDER_REFLECT)
+        if label is not None:
+            label = cv2.warpAffine(label, rot_matrix, (w, h), flags=cv2.INTER_NEAREST)  # ,  borderMode=cv2.BORDER_REFLECT)
         return image, label
 
     def _crop(self, image, label):
@@ -84,7 +85,8 @@ class BaseDataSet(Dataset):
             "borderType": cv2.BORDER_CONSTANT, }
         if pad_h > 0 or pad_w > 0:
             image = cv2.copyMakeBorder(image, value=self.image_padding, **pad_kwargs)
-            label = cv2.copyMakeBorder(label, value=self.ignore_index, **pad_kwargs)
+            if label is not None:
+                label = cv2.copyMakeBorder(label, value=self.ignore_index, **pad_kwargs)
 
         # Cropping 
         h, w, _ = image.shape
@@ -93,7 +95,8 @@ class BaseDataSet(Dataset):
         end_h = start_h + crop_h
         end_w = start_w + crop_w
         image = image[start_h:end_h, start_w:end_w]
-        label = label[start_h:end_h, start_w:end_w]
+        if label is not None:
+            label = label[start_h:end_h, start_w:end_w]
         return image, label
 
     def _blur(self, image, label):
@@ -108,7 +111,8 @@ class BaseDataSet(Dataset):
         # Random H flip
         if random.random() > 0.5:
             image = np.fliplr(image).copy()
-            label = np.fliplr(label).copy()
+            if label is not None:
+                label = np.fliplr(label).copy()
         return image, label
 
     def _resize(self, image, label, bigger_side_to_base_size=True):
@@ -127,7 +131,8 @@ class BaseDataSet(Dataset):
                 h, w = (longside, int(1.0 * longside * w / h + 0.5)) if h < w else (
                 int(1.0 * longside * h / w + 0.5), longside)
             image = np.asarray(Image.fromarray(np.uint8(image)).resize((w, h), Image.BICUBIC))
-            label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
+            if label is not None:
+                label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
             return image, label
 
         elif (isinstance(self.base_size, list) or isinstance(self.base_size, tuple)) and len(self.base_size) == 2:
@@ -138,7 +143,8 @@ class BaseDataSet(Dataset):
             else:
                 h, w = self.base_size
             image = np.asarray(Image.fromarray(np.uint8(image)).resize((w, h), Image.BICUBIC))
-            label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
+            if label is not None:
+                label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
             return image, label
 
         else:
@@ -180,7 +186,22 @@ class BaseDataSet(Dataset):
         elif self.augment:
             image, label = self._augmentation(image, label)
 
-        label = torch.from_numpy(np.array(label, dtype=np.int32)).long()
+        if label is not None:
+            VALID_COLOURS = [(255, 165, 0), (0, 255, 0), (0, 0, 0), (128, 128, 128)]
+            DEFAULT_PIXEL = (0, 0, 0)
+            VALID_COLOUR_TO_CLASS_IDX = {
+                (255, 165, 0): 0,
+                (0, 255, 0): 1,
+                (0, 0, 0): 2,
+                (128, 128, 128): 3
+                }
+            im = np.asarray(label)[..., :3]
+            pixels = [tuple(e) for e in im.reshape(im.shape[0] * im.shape[1], 3).tolist()]
+            cleaned_pixels = [pixel if pixel in VALID_COLOURS else DEFAULT_PIXEL for pixel in pixels]
+            cleaned_pixels = [VALID_COLOUR_TO_CLASS_IDX[e] for e in cleaned_pixels]
+            cleaned_image = np.array(cleaned_pixels).reshape(im.shape[0], im.shape[1]).astype('uint8')
+
+            label = torch.from_numpy(np.array(cleaned_image, dtype=np.int32)).long()
         return image, label
 
     def __repr__(self):

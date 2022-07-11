@@ -84,6 +84,7 @@ class CCT(BaseModel):
                                                *context_m_decoder, *object_masking, *feature_drop, *feature_noise])
 
     def forward(self, x_l=None, target_l=None, x_ul=None, target_ul=None, curr_iter=None, epoch=None):
+        print('Model inference')
         if not self.training:
             return self.main_decoder(self.encoder(x_l))
 
