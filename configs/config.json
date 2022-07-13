@@ -1,114 +1,96 @@
 {
-    "name": "CCT",
-    "experim_name": "CCT",
-    "n_gpu": 1,
-    "n_labeled_examples": 1464,
-    "diff_lrs": true,
-    "ramp_up": 0.1,
-    "unsupervised_w": 30,
-    "ignore_index": 255,
-    "lr_scheduler": "Poly",
-    "use_weak_lables":false,
-    "weakly_loss_w": 0.4,
-    "pretrained": true,
-
-    "model":{
-        "supervised": false,
-        "semi": true,
-        "supervised_w": 1,
-
-        "sup_loss": "CE",
-        "un_loss": "MSE",
-
-        "softmax_temp": 1,
-        "aux_constraint": false,
-        "aux_constraint_w": 1,
-        "confidence_masking": false,
-        "confidence_th": 0.5,
-
-        "drop": 6,
-        "drop_rate": 0.5,
-        "spatial": true,
-    
-        "cutout": 6,
-        "erase": 0.4,
-    
-        "vat": 2,
-        "xi": 1e-6,
-        "eps": 2.0,
-
-        "context_masking": 2,
-        "object_masking": 2,
-        "feature_drop": 6,
-
-        "feature_noise": 6,
-        "uniform_range": 0.3
-    },
-
-
-    "optimizer": {
-        "type": "SGD",
-        "args":{
-            "lr": 1e-2,
-            "weight_decay": 1e-4,
-            "momentum": 0.9
-        }
-    },
-
-
-    "train_supervised": {
-        "data_dir": "VOCtrainval_11-May-2012",
-        "batch_size": 10,
-        "crop_size": 320,
-        "shuffle": true,
-        "base_size": 400,
-        "scale": true,
-        "augment": true,
-        "flip": true,
-        "rotate": false,
-        "blur": false,
-        "split": "train_supervised",
-        "num_workers": 8
-    },
-
-    "train_unsupervised": {
-        "data_dir": "VOCtrainval_11-May-2012",
-        "weak_labels_output": "pseudo_labels/result/pseudo_labels",
-        "batch_size": 10,
-        "crop_size": 320,
-        "shuffle": true,
-        "base_size": 400,
-        "scale": true,
-        "augment": true,
-        "flip": true,
-        "rotate": false,
-        "blur": false,
-        "split": "train_unsupervised",
-        "num_workers": 8
-    },
-
-    "val_loader": {
-        "data_dir": "VOCtrainval_11-May-2012",
-        "batch_size": 1,
-        "val": true,
-        "split": "val",
-        "shuffle": false,
-        "num_workers": 4
-    },
-
-    "trainer": {
-        "epochs": 80,
-        "save_dir": "saved/",
-        "save_period": 5,
-  
-        "monitor": "max Mean_IoU",
-        "early_stop": 10,
-        
-        "tensorboardX": true,
-        "log_dir": "saved/",
-        "log_per_iter": 20,
-
-        "val": true,
-        "val_per_epochs": 5
+  "name": "CCT",
+  "experim_name": "CCT",
+  "n_gpu": 1,
+  "n_labeled_examples": 1464,
+  "diff_lrs": true,
+  "ramp_up": 0.1,
+  "unsupervised_w": 30,
+  "ignore_index": 255,
+  "lr_scheduler": "Poly",
+  "use_weak_lables": false,
+  "weakly_loss_w": 0.4,
+  "pretrained": true,
+  "model": {
+    "supervised": false,
+    "semi": true,
+    "supervised_w": 1,
+    "sup_loss": "CE",
+    "un_loss": "MSE",
+    "softmax_temp": 1,
+    "aux_constraint": false,
+    "aux_constraint_w": 1,
+    "confidence_masking": false,
+    "confidence_th": 0.5,
+    "drop": 6,
+    "drop_rate": 0.5,
+    "spatial": true,
+    "cutout": 6,
+    "erase": 0.4,
+    "vat": 2,
+    "xi": 1e-6,
+    "eps": 2.0,
+    "context_masking": 2,
+    "object_masking": 2,
+    "feature_drop": 6,
+    "feature_noise": 6,
+    "uniform_range": 0.3
+  },
+  "optimizer": {
+    "type": "SGD",
+    "args": {
+      "lr": 1e-2,
+      "weight_decay": 1e-4,
+      "momentum": 0.9
     }
+  },
+  "train_supervised": {
+    "data_dir": "/mnt/data/home/david/datasets/el/dataset",
+    "batch_size": 10,
+    "crop_size": 128,
+    "shuffle": true,
+    "base_size": 400,
+    "scale": true,
+    "augment": true,
+    "flip": true,
+    "rotate": false,
+    "blur": false,
+    "split": "train_supervised",
+    "num_workers": 8
+  },
+  "train_unsupervised": {
+    "data_dir": "/mnt/data/home/david/datasets/el/dataset",
+    "weak_labels_output": "pseudo_labels/result/pseudo_labels",
+    "batch_size": 10,
+    "crop_size": 128,
+    "shuffle": true,
+    "base_size": 400,
+    "scale": true,
+    "augment": true,
+    "flip": true,
+    "rotate": false,
+    "blur": false,
+    "split": "train_unsupervised",
+    "num_workers": 8
+  },
+  "val_loader": {
+    "data_dir": "/mnt/data/home/david/datasets/el/dataset",
+    "batch_size": 1,
+    "val": true,
+    "split": "val",
+    "shuffle": false,
+    "num_workers": 4
+  },
+  "trainer": {
+    "epochs": 80,
+    "save_dir": "saved/",
+    "save_period": 5,
+    "monitor": "max Mean_IoU",
+    "early_stop": 10,
+    "tensorboardX": true,
+    "log_dir": "saved/",
+    "log_per_iter": 20,
+    "val": true,
+    "val_per_epochs": 5
+  }
 }

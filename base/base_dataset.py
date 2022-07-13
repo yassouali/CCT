@@ -9,10 +9,12 @@ from torchvision import transforms
 from scipy import ndimage
 from math import ceil
 
+
 class BaseDataSet(Dataset):
     def __init__(self, data_dir, split, mean, std, ignore_index, base_size=None, augment=True, val=False,
-                jitter=False, use_weak_lables=False, weak_labels_output=None, crop_size=None, scale=False, flip=False, rotate=False,
-                blur=False, return_id=False, n_labeled_examples=None):
+                 jitter=False, use_weak_lables=False, weak_labels_output=None, crop_size=None, scale=False, flip=False,
+                 rotate=False,
+                 blur=False, return_id=False, n_labeled_examples=None):
 
         self.root = data_dir
         self.split = split
@@ -21,7 +23,7 @@ class BaseDataSet(Dataset):
         self.augment = augment
         self.crop_size = crop_size
         self.jitter = jitter
-        self.image_padding = (np.array(mean)*255.).tolist()
+        self.image_padding = (np.array(mean) * 255.).tolist()
         self.ignore_index = ignore_index
         self.return_id = return_id
         self.n_labeled_examples = n_labeled_examples
@@ -48,7 +50,7 @@ class BaseDataSet(Dataset):
 
     def _set_files(self):
         raise NotImplementedError
-    
+
     def _load_data(self, index):
         raise NotImplementedError
 
@@ -58,16 +60,17 @@ class BaseDataSet(Dataset):
         angle = random.randint(-10, 10)
         center = (w / 2, h / 2)
         rot_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
-        image = cv2.warpAffine(image, rot_matrix, (w, h), flags=cv2.INTER_CUBIC)#, borderMode=cv2.BORDER_REFLECT)
-        label = cv2.warpAffine(label, rot_matrix, (w, h), flags=cv2.INTER_NEAREST)#,  borderMode=cv2.BORDER_REFLECT)
-        return image, label            
+        image = cv2.warpAffine(image, rot_matrix, (w, h), flags=cv2.INTER_CUBIC)  # , borderMode=cv2.BORDER_REFLECT)
+        if label is not None:
+            label = cv2.warpAffine(label, rot_matrix, (w, h), flags=cv2.INTER_NEAREST)  # ,  borderMode=cv2.BORDER_REFLECT)
+        return image, label
 
-    def _crop(self, image, label):   
+    def _crop(self, image, label):
         # Padding to return the correct crop size
         if (isinstance(self.crop_size, list) or isinstance(self.crop_size, tuple)) and len(self.crop_size) == 2:
-            crop_h, crop_w = self.crop_size 
+            crop_h, crop_w = self.crop_size
         elif isinstance(self.crop_size, int):
-            crop_h, crop_w = self.crop_size, self.crop_size 
+            crop_h, crop_w = self.crop_size, self.crop_size
         else:
             raise ValueError
 
@@ -79,10 +82,11 @@ class BaseDataSet(Dataset):
             "bottom": pad_h,
             "left": 0,
             "right": pad_w,
-            "borderType": cv2.BORDER_CONSTANT,}
+            "borderType": cv2.BORDER_CONSTANT, }
         if pad_h > 0 or pad_w > 0:
             image = cv2.copyMakeBorder(image, value=self.image_padding, **pad_kwargs)
-            label = cv2.copyMakeBorder(label, value=self.ignore_index, **pad_kwargs)
+            if label is not None:
+                label = cv2.copyMakeBorder(label, value=self.ignore_index, **pad_kwargs)
 
         # Cropping 
         h, w, _ = image.shape
@@ -91,7 +95,8 @@ class BaseDataSet(Dataset):
         end_h = start_h + crop_h
         end_w = start_w + crop_w
         image = image[start_h:end_h, start_w:end_w]
-        label = label[start_h:end_h, start_w:end_w]
+        if label is not None:
+            label = label[start_h:end_h, start_w:end_w]
         return image, label
 
     def _blur(self, image, label):
@@ -106,35 +111,40 @@ class BaseDataSet(Dataset):
         # Random H flip
         if random.random() > 0.5:
             image = np.fliplr(image).copy()
-            label = np.fliplr(label).copy()
+            if label is not None:
+                label = np.fliplr(label).copy()
         return image, label
 
     def _resize(self, image, label, bigger_side_to_base_size=True):
         if isinstance(self.base_size, int):
             h, w, _ = image.shape
             if self.scale:
-                longside = random.randint(int(self.base_size*0.5), int(self.base_size*2.0))
-                #longside = random.randint(int(self.base_size*0.5), int(self.base_size*1))
+                longside = random.randint(int(self.base_size * 0.5), int(self.base_size * 2.0))
+                # longside = random.randint(int(self.base_size*0.5), int(self.base_size*1))
             else:
                 longside = self.base_size
 
             if bigger_side_to_base_size:
-                h, w = (longside, int(1.0 * longside * w / h + 0.5)) if h > w else (int(1.0 * longside * h / w + 0.5), longside)
+                h, w = (longside, int(1.0 * longside * w / h + 0.5)) if h > w else (
+                int(1.0 * longside * h / w + 0.5), longside)
             else:
-                h, w = (longside, int(1.0 * longside * w / h + 0.5)) if h < w else (int(1.0 * longside * h / w + 0.5), longside)
+                h, w = (longside, int(1.0 * longside * w / h + 0.5)) if h < w else (
+                int(1.0 * longside * h / w + 0.5), longside)
             image = np.asarray(Image.fromarray(np.uint8(image)).resize((w, h), Image.BICUBIC))
-            label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
+            if label is not None:
+                label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
             return image, label
 
         elif (isinstance(self.base_size, list) or isinstance(self.base_size, tuple)) and len(self.base_size) == 2:
             h, w, _ = image.shape
             if self.scale:
-                scale = random.random() * 1.5 + 0.5 # Scaling between [0.5, 2]
+                scale = random.random() * 1.5 + 0.5  # Scaling between [0.5, 2]
                 h, w = int(self.base_size[0] * scale), int(self.base_size[1] * scale)
             else:
                 h, w = self.base_size
             image = np.asarray(Image.fromarray(np.uint8(image)).resize((w, h), Image.BICUBIC))
-            label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
+            if label is not None:
+                label = cv2.resize(label, (w, h), interpolation=cv2.INTER_NEAREST)
             return image, label
 
         else:
@@ -162,21 +172,36 @@ class BaseDataSet(Dataset):
             image, label = self._flip(image, label)
 
         image = Image.fromarray(np.uint8(image))
-        image = self.jitter_tf(image) if self.jitter else image    
-        
+        image = self.jitter_tf(image) if self.jitter else image
+
         return self.normalize(self.to_tensor(image)), label
 
     def __len__(self):
         return len(self.files)
-  
+
     def __getitem__(self, index):
-        image, label, image_id =  self._load_data(index)
+        image, label, image_id = self._load_data(index)
         if self.val:
             image, label = self._val_augmentation(image, label)
         elif self.augment:
             image, label = self._augmentation(image, label)
 
-        label = torch.from_numpy(np.array(label, dtype=np.int32)).long()
+        if label is not None:
+            VALID_COLOURS = [(255, 165, 0), (0, 255, 0), (0, 0, 0), (128, 128, 128)]
+            DEFAULT_PIXEL = (0, 0, 0)
+            VALID_COLOUR_TO_CLASS_IDX = {
+                (255, 165, 0): 0,
+                (0, 255, 0): 1,
+                (0, 0, 0): 2,
+                (128, 128, 128): 3
+                }
+            im = np.asarray(label)[..., :3]
+            pixels = [tuple(e) for e in im.reshape(im.shape[0] * im.shape[1], 3).tolist()]
+            cleaned_pixels = [pixel if pixel in VALID_COLOURS else DEFAULT_PIXEL for pixel in pixels]
+            cleaned_pixels = [VALID_COLOUR_TO_CLASS_IDX[e] for e in cleaned_pixels]
+            cleaned_image = np.array(cleaned_pixels).reshape(im.shape[0], im.shape[1]).astype('uint8')
+
+            label = torch.from_numpy(np.array(cleaned_image, dtype=np.int32)).long()
         return image, label
 
     def __repr__(self):
@@ -185,4 +210,3 @@ class BaseDataSet(Dataset):
         fmt_str += "    Split: {}\n".format(self.split)
         fmt_str += "    Root: {}".format(self.root)
         return fmt_str
-

@@ -4,8 +4,9 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 
+
 class BaseDataLoader(DataLoader):
-    def __init__(self, dataset, batch_size, shuffle, num_workers, val_split = 0.0):
+    def __init__(self, dataset, batch_size, shuffle, num_workers, val_split=0.0):
         self.shuffle = shuffle
         self.dataset = dataset
         self.nbr_examples = len(dataset)
@@ -26,12 +27,12 @@ class BaseDataLoader(DataLoader):
     def _split_sampler(self, split):
         if split == 0.0:
             return None, None
-        
+
         self.shuffle = False
 
         split_indx = int(self.nbr_examples * split)
         np.random.seed(0)
-        
+
         indxs = np.arange(self.nbr_examples)
         np.random.shuffle(indxs)
         train_indxs = indxs[split_indx:]

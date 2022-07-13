@@ -10,9 +10,10 @@ from models.decoders import *
 from models.encoder import Encoder
 from utils.losses import CE_loss
 
+
 class CCT(BaseModel):
     def __init__(self, num_classes, conf, sup_loss=None, cons_w_unsup=None, ignore_index=None, testing=False,
-            pretrained=True, use_weak_lables=False, weakly_loss_w=0.4):
+                 pretrained=True, use_weak_lables=False, weakly_loss_w=0.4):
 
         if not testing:
             assert (ignore_index is not None) and (sup_loss is not None) and (cons_w_unsup is not None)
@@ -27,13 +28,13 @@ class CCT(BaseModel):
         # Supervised and unsupervised losses
         self.ignore_index = ignore_index
         if conf['un_loss'] == "KL":
-        	self.unsuper_loss = softmax_kl_loss
+            self.unsuper_loss = softmax_kl_loss
         elif conf['un_loss'] == "MSE":
-        	self.unsuper_loss = softmax_mse_loss
+            self.unsuper_loss = softmax_mse_loss
         elif conf['un_loss'] == "JS":
-        	self.unsuper_loss = softmax_js_loss
+            self.unsuper_loss = softmax_js_loss
         else:
-        	raise ValueError(f"Invalid supervised loss {conf['un_loss']}")
+            raise ValueError(f"Invalid supervised loss {conf['un_loss']}")
 
         self.unsup_loss_w = cons_w_unsup
         self.sup_loss_w = conf['supervised_w']
@@ -63,26 +64,27 @@ class CCT(BaseModel):
         # The auxilary decoders
         if self.mode == 'semi' or self.mode == 'weakly_semi':
             vat_decoder = [VATDecoder(upscale, decoder_in_ch, num_classes, xi=conf['xi'],
-            							eps=conf['eps']) for _ in range(conf['vat'])]
+                                      eps=conf['eps']) for _ in range(conf['vat'])]
             drop_decoder = [DropOutDecoder(upscale, decoder_in_ch, num_classes,
-            							drop_rate=conf['drop_rate'], spatial_dropout=conf['spatial'])
-            							for _ in range(conf['drop'])]
+                                           drop_rate=conf['drop_rate'], spatial_dropout=conf['spatial'])
+                            for _ in range(conf['drop'])]
             cut_decoder = [CutOutDecoder(upscale, decoder_in_ch, num_classes, erase=conf['erase'])
-            							for _ in range(conf['cutout'])]
+                           for _ in range(conf['cutout'])]
             context_m_decoder = [ContextMaskingDecoder(upscale, decoder_in_ch, num_classes)
-            							for _ in range(conf['context_masking'])]
+                                 for _ in range(conf['context_masking'])]
             object_masking = [ObjectMaskingDecoder(upscale, decoder_in_ch, num_classes)
-            							for _ in range(conf['object_masking'])]
+                              for _ in range(conf['object_masking'])]
             feature_drop = [FeatureDropDecoder(upscale, decoder_in_ch, num_classes)
-            							for _ in range(conf['feature_drop'])]
+                            for _ in range(conf['feature_drop'])]
             feature_noise = [FeatureNoiseDecoder(upscale, decoder_in_ch, num_classes,
-            							uniform_range=conf['uniform_range'])
-            							for _ in range(conf['feature_noise'])]
+                                                 uniform_range=conf['uniform_range'])
+                             for _ in range(conf['feature_noise'])]
 
             self.aux_decoders = nn.ModuleList([*vat_decoder, *drop_decoder, *cut_decoder,
-                                    *context_m_decoder, *object_masking, *feature_drop, *feature_noise])
+                                               *context_m_decoder, *object_masking, *feature_drop, *feature_noise])
 
     def forward(self, x_l=None, target_l=None, x_ul=None, target_ul=None, curr_iter=None, epoch=None):
+        print('Model inference')
         if not self.training:
             return self.main_decoder(self.encoder(x_l))
 
@@ -96,11 +98,13 @@ class CCT(BaseModel):
 
         # Supervised loss
         if self.sup_type == 'CE':
-            loss_sup = self.sup_loss(output_l, target_l, ignore_index=self.ignore_index, temperature=self.softmax_temp) * self.sup_loss_w
+            loss_sup = self.sup_loss(output_l, target_l, ignore_index=self.ignore_index,
+                                     temperature=self.softmax_temp) * self.sup_loss_w
         elif self.sup_type == 'FL':
-            loss_sup = self.sup_loss(output_l,target_l) * self.sup_loss_w
+            loss_sup = self.sup_loss(output_l, target_l) * self.sup_loss_w
         else:
-            loss_sup = self.sup_loss(output_l, target_l, curr_iter=curr_iter, epoch=epoch, ignore_index=self.ignore_index) * self.sup_loss_w
+            loss_sup = self.sup_loss(output_l, target_l, curr_iter=curr_iter, epoch=epoch,
+                                     ignore_index=self.ignore_index) * self.sup_loss_w
 
         # If supervised mode only, return
         if self.mode == 'supervised':
@@ -121,8 +125,9 @@ class CCT(BaseModel):
 
             # Compute unsupervised loss
             loss_unsup = sum([self.unsuper_loss(inputs=u, targets=targets, \
-                            conf_mask=self.confidence_masking, threshold=self.confidence_th, use_softmax=False)
-                            for u in outputs_ul])
+                                                conf_mask=self.confidence_masking, threshold=self.confidence_th,
+                                                use_softmax=False)
+                              for u in outputs_ul])
             loss_unsup = (loss_unsup / len(outputs_ul))
             curr_losses = {'loss_sup': loss_sup}
 
@@ -134,12 +139,13 @@ class CCT(BaseModel):
             weight_u = self.unsup_loss_w(epoch=epoch, curr_iter=curr_iter)
             loss_unsup = loss_unsup * weight_u
             curr_losses['loss_unsup'] = loss_unsup
-            total_loss = loss_unsup  + loss_sup
+            total_loss = loss_unsup + loss_sup
 
             # If case we're using weak lables, add the weak loss term with a weight (self.weakly_loss_w)
             if self.use_weak_lables:
                 weight_w = (weight_u / self.unsup_loss_w.final_w) * self.weakly_loss_w
-                loss_weakly = sum([CE_loss(outp, target_ul, ignore_index=self.ignore_index) for outp in outputs_ul]) / len(outputs_ul)
+                loss_weakly = sum(
+                    [CE_loss(outp, target_ul, ignore_index=self.ignore_index) for outp in outputs_ul]) / len(outputs_ul)
                 loss_weakly = loss_weakly * weight_w
                 curr_losses['loss_weakly'] = loss_weakly
                 total_loss += loss_weakly
@@ -157,8 +163,7 @@ class CCT(BaseModel):
 
     def get_other_params(self):
         if self.mode == 'semi':
-            return chain(self.encoder.get_module_params(), self.main_decoder.parameters(), 
-                        self.aux_decoders.parameters())
+            return chain(self.encoder.get_module_params(), self.main_decoder.parameters(),
+                         self.aux_decoders.parameters())
 
         return chain(self.encoder.get_module_params(), self.main_decoder.parameters())
-

@@ -2,20 +2,21 @@ import dominate
 from dominate.tags import *
 import os, json, datetime
 
+
 class HTML:
     def __init__(self, web_dir, exp_name, config, title='seg results', save_name='index', reflesh=0, resume=None):
         self.title = title
         self.web_dir = web_dir
-        self.save_name = save_name+'.html'
+        self.save_name = save_name + '.html'
 
         if not os.path.exists(self.web_dir):
             os.makedirs(self.web_dir)
-        
+
         html_file = os.path.join(self.web_dir, self.save_name)
 
         if resume is not None and os.path.isfile(html_file):
             self.old_content = open(html_file).read()
-        else :
+        else:
             self.old_content = None
 
         self.doc = dominate.document(title=title)
@@ -24,7 +25,7 @@ class HTML:
                 meta(http_equiv="reflesh", content=str(reflesh))
 
         date_time = datetime.datetime.now().strftime('%m-%d_%H-%M')
-        header = f'Experiment name: {exp_name}, Date: {date_time}'    
+        header = f'Experiment name: {exp_name}, Date: {date_time}'
         self.add_header(header)
         self.add_header('Configs')
         self.add_config(config)
@@ -32,7 +33,7 @@ class HTML:
             hr()
             hr()
         self.add_table()
-    
+
     def add_header(self, str):
         with self.doc:
             h3(str)
@@ -74,7 +75,6 @@ class HTML:
                         td(f'Mean_IoU : {seg_resuts["Mean_IoU"]}')
                         td(f'PixelAcc : {seg_resuts["Pixel_Accuracy"]}')
                         td(f'Val Loss : {seg_resuts["val_loss"]}')
-
 
     def save(self):
         html_file = os.path.join(self.web_dir, self.save_name)
