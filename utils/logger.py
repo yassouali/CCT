@@ -3,6 +3,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='')
 
+
 class Logger:
     """
     Training process logger
@@ -10,6 +11,7 @@ class Logger:
     Note:
         Used by BaseTrainer to save training history.
     """
+
     def __init__(self):
         self.entries = {}
 

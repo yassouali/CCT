@@ -105,7 +105,7 @@ class DilatedResnetBackbone(nn.Module):
 
 
 def ResNetBackbone(backbone=None, pretrained=None, multi_grid=None, norm_type='batchnorm'):
-    arch =  backbone
+    arch = backbone
     if arch == 'resnet34':
         orig_resnet = resnet34(pretrained=pretrained)
         arch_net = NormalResnetBackbone(orig_resnet)

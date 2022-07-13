@@ -6,8 +6,10 @@ from utils import logger
 import utils.lr_scheduler
 from utils.htmlwriter import HTML
 
+
 def get_instance(module, name, config, *args):
     return getattr(module, config[name]['type'])(*args, **config[name]['args'])
+
 
 class BaseTrainer:
     def __init__(self, model, resume, config, iters_per_epoch, train_logger=None):
@@ -31,17 +33,18 @@ class BaseTrainer:
         self.save_period = cfg_trainer['save_period']
 
         # OPTIMIZER
-        trainable_params = [{'params': filter(lambda p:p.requires_grad, self.model.module.get_other_params())},
-                            {'params': filter(lambda p:p.requires_grad, self.model.module.get_backbone_params()), 
-                            'lr': config['optimizer']['args']['lr'] / 10}]
+        trainable_params = [{'params': filter(lambda p: p.requires_grad, self.model.module.get_other_params())},
+                            {'params': filter(lambda p: p.requires_grad, self.model.module.get_backbone_params()),
+                             'lr': config['optimizer']['args']['lr'] / 10}]
 
         self.optimizer = get_instance(torch.optim, 'optimizer', config, trainable_params)
         model_params = sum([i.shape.numel() for i in list(model.parameters())])
         opt_params = sum([i.shape.numel() for j in self.optimizer.param_groups for i in j['params']])
         assert opt_params == model_params, 'some params are missing in the opt'
 
-        self.lr_scheduler = getattr(utils.lr_scheduler, config['lr_scheduler'])(optimizer=self.optimizer, num_epochs=self.epochs, 
-                                        iters_per_epoch=iters_per_epoch)
+        self.lr_scheduler = getattr(utils.lr_scheduler, config['lr_scheduler'])(optimizer=self.optimizer,
+                                                                                num_epochs=self.epochs,
+                                                                                iters_per_epoch=iters_per_epoch)
 
         # MONITORING
         self.monitor = cfg_trainer.get('monitor', 'off')
@@ -62,11 +65,11 @@ class BaseTrainer:
         config_save_path = os.path.join(self.checkpoint_dir, 'config.json')
         with open(config_save_path, 'w') as handle:
             json.dump(self.config, handle, indent=4, sort_keys=True)
-         
+
         writer_dir = os.path.join(cfg_trainer['log_dir'], run_name)
         self.writer = tensorboard.SummaryWriter(writer_dir)
         self.html_results = HTML(web_dir=config['trainer']['save_dir'], exp_name=config['experim_name'],
-                            save_name=config['experim_name'], config=config, resume=resume)
+                                 save_name=config['experim_name'], config=config, resume=resume)
 
         if resume: self._resume_checkpoint(resume)
 
@@ -78,36 +81,37 @@ class BaseTrainer:
         elif n_gpu > sys_gpu:
             self.logger.warning(f'Nbr of GPU requested is {n_gpu} but only {sys_gpu} are available')
             n_gpu = sys_gpu
-            
+
         device = torch.device('cuda:0' if n_gpu > 0 else 'cpu')
         self.logger.info(f'Detected GPUs: {sys_gpu} Requested: {n_gpu}')
         available_gpus = list(range(n_gpu))
         return device, available_gpus
 
-
-
     def train(self):
-        for epoch in range(self.start_epoch, self.epochs+1):
+        for epoch in range(self.start_epoch, self.epochs + 1):
             results = self._train_epoch(epoch)
             if self.do_validation and epoch % self.config['trainer']['val_per_epochs'] == 0:
                 results = self._valid_epoch(epoch)
                 self.logger.info('\n\n')
                 for k, v in results.items():
                     self.logger.info(f'         {str(k):15s}: {v}')
-            
+
             if self.train_logger is not None:
-                log = {'epoch' : epoch, **results}
+                log = {'epoch': epoch, **results}
                 self.train_logger.add_entry(log)
 
             # CHECKING IF THIS IS THE BEST MODEL (ONLY FOR VAL)
             if self.mnt_mode != 'off' and epoch % self.config['trainer']['val_per_epochs'] == 0:
                 try:
-                    if self.mnt_mode == 'min': self.improved = (log[self.mnt_metric] < self.mnt_best)
-                    else: self.improved = (log[self.mnt_metric] > self.mnt_best)
+                    if self.mnt_mode == 'min':
+                        self.improved = (log[self.mnt_metric] < self.mnt_best)
+                    else:
+                        self.improved = (log[self.mnt_metric] > self.mnt_best)
                 except KeyError:
-                    self.logger.warning(f'The metrics being tracked ({self.mnt_metric}) has not been calculated. Training stops.')
+                    self.logger.warning(
+                        f'The metrics being tracked ({self.mnt_metric}) has not been calculated. Training stops.')
                     break
-                    
+
                 if self.improved:
                     self.mnt_best = log[self.mnt_metric]
                     self.not_improved_count = 0
@@ -124,7 +128,6 @@ class BaseTrainer:
                 self._save_checkpoint(epoch, save_best=self.improved)
         self.html_results.save()
 
-
     def _save_checkpoint(self, epoch, save_best=False):
         state = {
             'arch': type(self.model).__name__,
@@ -135,7 +138,7 @@ class BaseTrainer:
         }
 
         filename = os.path.join(self.checkpoint_dir, f'checkpoint.pth')
-        self.logger.info(f'\nSaving a checkpoint: {filename} ...') 
+        self.logger.info(f'\nSaving a checkpoint: {filename} ...')
         torch.save(state, filename)
 
         if save_best:

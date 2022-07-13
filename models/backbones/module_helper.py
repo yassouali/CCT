@@ -13,9 +13,12 @@ try:
 except ImportError:
     from urllib.request import urlretrieve
 
+
 class FixedBatchNorm(nn.BatchNorm2d):
     def forward(self, input):
-        return F.batch_norm(input, self.running_mean, self.running_var, self.weight, self.bias, training=False, eps=self.eps)
+        return F.batch_norm(input, self.running_mean, self.running_var, self.weight, self.bias, training=False,
+                            eps=self.eps)
+
 
 class ModuleHelper(object):
 
@@ -171,4 +174,3 @@ class ModuleHelper(object):
                 module.weight, mode=mode, nonlinearity=nonlinearity)
         if hasattr(module, 'bias') and module.bias is not None:
             nn.init.constant_(module.bias, bias)
-

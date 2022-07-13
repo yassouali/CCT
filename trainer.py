@@ -1,5 +1,5 @@
 import torch
-import time, random, cv2, sys 
+import time, random, cv2, sys
 from math import ceil
 import numpy as np
 from itertools import cycle
@@ -14,12 +14,11 @@ from PIL import Image
 from utils.helpers import DeNormalize
 
 
-
 class Trainer(BaseTrainer):
     def __init__(self, model, resume, config, supervised_loader, unsupervised_loader, iter_per_epoch,
-                val_loader=None, train_logger=None):
+                 val_loader=None, train_logger=None):
         super(Trainer, self).__init__(model, resume, config, iter_per_epoch, train_logger)
-        
+
         self.supervised_loader = supervised_loader
         self.unsupervised_loader = unsupervised_loader
         self.val_loader = val_loader
@@ -43,11 +42,9 @@ class Trainer(BaseTrainer):
 
         self.start_time = time.time()
 
-
-
     def _train_epoch(self, epoch):
         self.html_results.save()
-        
+
         self.logger.info('\n')
         self.model.train()
 
@@ -70,34 +67,32 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
 
             total_loss, cur_losses, outputs = self.model(x_l=input_l, target_l=target_l, x_ul=input_ul,
-                                                        curr_iter=batch_idx, target_ul=target_ul, epoch=epoch-1)
+                                                         curr_iter=batch_idx, target_ul=target_ul, epoch=epoch - 1)
             total_loss = total_loss.mean()
             total_loss.backward()
             self.optimizer.step()
 
             self._update_losses(cur_losses)
-            self._compute_metrics(outputs, target_l, target_ul, epoch-1)
+            self._compute_metrics(outputs, target_l, target_ul, epoch - 1)
             logs = self._log_values(cur_losses)
-            
+
             if batch_idx % self.log_step == 0:
                 self.wrt_step = (epoch - 1) * len(self.unsupervised_loader) + batch_idx
                 self._write_scalars_tb(logs)
 
-            if batch_idx % int(len(self.unsupervised_loader)*0.9) == 0:
+            if batch_idx % int(len(self.unsupervised_loader) * 0.9) == 0:
                 self._write_img_tb(input_l, target_l, input_ul, target_ul, outputs, epoch)
 
             del input_l, target_l, input_ul, target_ul
             del total_loss, cur_losses, outputs
-            
+
             tbar.set_description('T ({}) | Ls {:.2f} Lu {:.2f} Lw {:.2f} PW {:.2f} m1 {:.2f} m2 {:.2f}|'.format(
                 epoch, self.loss_sup.average, self.loss_unsup.average, self.loss_weakly.average,
                 self.pair_wise.average, self.mIoU_l, self.mIoU_ul))
 
-            self.lr_scheduler.step(epoch=epoch-1)
+            self.lr_scheduler.step(epoch=epoch - 1)
 
         return logs
-
-
 
     def _valid_epoch(self, epoch):
         if self.val_loader is None:
@@ -129,8 +124,8 @@ class Trainer(BaseTrainer):
                 total_loss_val.update(loss.item())
 
                 correct, labeled, inter, union = eval_metrics(output, target, self.num_classes, self.ignore_index)
-                total_inter, total_union = total_inter+inter, total_union+union
-                total_correct, total_label = total_correct+correct, total_label+labeled
+                total_inter, total_union = total_inter + inter, total_union + union
+                total_correct, total_label = total_correct + correct, total_label + labeled
 
                 # LIST OF IMAGE TO VIZ (15 images)
                 if len(val_visual) < 15:
@@ -144,17 +139,19 @@ class Trainer(BaseTrainer):
                 IoU = 1.0 * total_inter / (np.spacing(1) + total_union)
                 mIoU = IoU.mean()
                 seg_metrics = {"Pixel_Accuracy": np.round(pixAcc, 3), "Mean_IoU": np.round(mIoU, 3),
-                                "Class_IoU": dict(zip(range(self.num_classes), np.round(IoU, 3)))}
+                               "Class_IoU": dict(zip(range(self.num_classes), np.round(IoU, 3)))}
 
-                tbar.set_description('EVAL ({}) | Loss: {:.3f}, PixelAcc: {:.2f}, Mean IoU: {:.2f} |'.format( epoch,
-                                                total_loss_val.average, pixAcc, mIoU))
+                tbar.set_description('EVAL ({}) | Loss: {:.3f}, PixelAcc: {:.2f}, Mean IoU: {:.2f} |'.format(epoch,
+                                                                                                             total_loss_val.average,
+                                                                                                             pixAcc,
+                                                                                                             mIoU))
 
             self._add_img_tb(val_visual, 'val')
 
             # METRICS TO TENSORBOARD
             self.wrt_step = (epoch) * len(self.val_loader)
             self.writer.add_scalar(f'{self.wrt_mode}/loss', total_loss_val.average, self.wrt_step)
-            for k, v in list(seg_metrics.items())[:-1]: 
+            for k, v in list(seg_metrics.items())[:-1]:
                 self.writer.add_scalar(f'{self.wrt_mode}/{k}', v, self.wrt_step)
 
             log = {
@@ -168,11 +165,9 @@ class Trainer(BaseTrainer):
                 self._save_checkpoint(epoch, save_best=self.improved)
         return log
 
-
-
     def _reset_metrics(self):
         self.loss_sup = AverageMeter()
-        self.loss_unsup  = AverageMeter()
+        self.loss_unsup = AverageMeter()
         self.loss_weakly = AverageMeter()
         self.pair_wise = AverageMeter()
         self.total_inter_l, self.total_union_l = 0, 0
@@ -183,8 +178,6 @@ class Trainer(BaseTrainer):
         self.pixel_acc_l, self.pixel_acc_ul = 0, 0
         self.class_iou_l, self.class_iou_ul = {}, {}
 
-
-
     def _update_losses(self, cur_losses):
         if "loss_sup" in cur_losses.keys():
             self.loss_sup.update(cur_losses['loss_sup'].mean().item())
@@ -194,8 +187,6 @@ class Trainer(BaseTrainer):
             self.loss_weakly.update(cur_losses['loss_weakly'].mean().item())
         if "pair_wise" in cur_losses.keys():
             self.pair_wise.update(cur_losses['pair_wise'].mean().item())
-
-
 
     def _compute_metrics(self, outputs, target_l, target_ul, epoch):
         seg_metrics_l = eval_metrics(outputs['sup_pred'], target_l, self.num_classes, self.ignore_index)
@@ -208,8 +199,6 @@ class Trainer(BaseTrainer):
             self._update_seg_metrics(*seg_metrics_ul, False)
             seg_metrics_ul = self._get_seg_metrics(False)
             self.pixel_acc_ul, self.mIoU_ul, self.class_iou_ul = seg_metrics_ul.values()
-            
-
 
     def _update_seg_metrics(self, correct, labeled, inter, union, supervised=True):
         if supervised:
@@ -222,8 +211,6 @@ class Trainer(BaseTrainer):
             self.total_label_ul += labeled
             self.total_inter_ul += inter
             self.total_union_ul += union
-
-
 
     def _get_seg_metrics(self, supervised=True):
         if supervised:
@@ -238,8 +225,6 @@ class Trainer(BaseTrainer):
             "Mean_IoU": np.round(mIoU, 3),
             "Class_IoU": dict(zip(range(self.num_classes), np.round(IoU, 3)))
         }
-
-
 
     def _log_values(self, cur_losses):
         logs = {}
@@ -259,7 +244,6 @@ class Trainer(BaseTrainer):
             logs['pixel_acc_unlabeled'] = self.pixel_acc_ul
         return logs
 
-
     def _write_scalars_tb(self, logs):
         for k, v in logs.items():
             if 'class_iou' not in k: self.writer.add_scalar(f'train/{k}', v, self.wrt_step)
@@ -268,22 +252,18 @@ class Trainer(BaseTrainer):
         current_rampup = self.model.module.unsup_loss_w.current_rampup
         self.writer.add_scalar('train/Unsupervised_rampup', current_rampup, self.wrt_step)
 
-
-
     def _add_img_tb(self, val_visual, wrt_mode):
         val_img = []
         palette = self.val_loader.dataset.palette
         for imgs in val_visual:
-            imgs = [self.restore_transform(i) if (isinstance(i, torch.Tensor) and len(i.shape) == 3) 
-                        else colorize_mask(i, palette) for i in imgs]
+            imgs = [self.restore_transform(i) if (isinstance(i, torch.Tensor) and len(i.shape) == 3)
+                    else colorize_mask(i, palette) for i in imgs]
             imgs = [i.convert('RGB') for i in imgs]
             imgs = [self.viz_transform(i) for i in imgs]
             val_img.extend(imgs)
         val_img = torch.stack(val_img, 0)
-        val_img = make_grid(val_img.cpu(), nrow=val_img.size(0)//len(val_visual), padding=5)
+        val_img = make_grid(val_img.cpu(), nrow=val_img.size(0) // len(val_visual), padding=5)
         self.writer.add_image(f'{wrt_mode}/inputs_targets_predictions', val_img, self.wrt_step)
-
-
 
     def _write_img_tb(self, input_l, target_l, input_ul, target_ul, outputs, epoch):
         outputs_l_np = outputs['sup_pred'].data.max(1)[1].cpu().numpy()
@@ -296,4 +276,3 @@ class Trainer(BaseTrainer):
             targets_ul_np = target_ul.data.cpu().numpy()
             imgs = [[i.data.cpu(), j, k] for i, j, k in zip(input_ul, outputs_ul_np, targets_ul_np)]
             self._add_img_tb(imgs, 'unsupervised')
-

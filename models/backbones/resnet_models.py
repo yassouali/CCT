@@ -9,7 +9,6 @@ from collections import OrderedDict
 
 from models.backbones.module_helper import ModuleHelper
 
-
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
@@ -180,6 +179,7 @@ def resnet18(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
 
+
 def deepbase_resnet18(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-18 model.
     Args:
@@ -188,6 +188,7 @@ def deepbase_resnet18(num_classes=1000, pretrained=None, norm_type='batchnorm', 
     model = ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes, deep_base=True, norm_type=norm_type)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
+
 
 def resnet34(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-34 model.
@@ -198,6 +199,7 @@ def resnet34(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
 
+
 def deepbase_resnet34(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-34 model.
     Args:
@@ -206,6 +208,7 @@ def deepbase_resnet34(num_classes=1000, pretrained=None, norm_type='batchnorm', 
     model = ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, deep_base=True, norm_type=norm_type)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
+
 
 def resnet50(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-50 model.
@@ -216,6 +219,7 @@ def resnet50(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
 
+
 def deepbase_resnet50(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-50 model.
     Args:
@@ -224,6 +228,7 @@ def deepbase_resnet50(num_classes=1000, pretrained=None, norm_type='batchnorm', 
     model = ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, deep_base=True, norm_type=norm_type)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
+
 
 def resnet101(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-101 model.
@@ -234,6 +239,7 @@ def resnet101(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
 
+
 def deepbase_resnet101(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-101 model.
     Args:
@@ -242,6 +248,7 @@ def deepbase_resnet101(num_classes=1000, pretrained=None, norm_type='batchnorm',
     model = ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, deep_base=True, norm_type=norm_type)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
+
 
 def resnet152(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-152 model.
@@ -252,6 +259,7 @@ def resnet152(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs
     model = ResNet(Bottleneck, [3, 8, 36, 3], num_classes=num_classes, deep_base=False, norm_type=norm_type)
     model = ModuleHelper.load_model(model, pretrained=pretrained)
     return model
+
 
 def deepbase_resnet152(num_classes=1000, pretrained=None, norm_type='batchnorm', **kwargs):
     """Constructs a ResNet-152 model.

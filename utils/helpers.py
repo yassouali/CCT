@@ -9,7 +9,7 @@ import torch.nn as nn
 import numpy as np
 import math
 import PIL
-import cv2 
+import cv2
 from matplotlib import colors
 from matplotlib import pyplot as plt
 import matplotlib.cm as cmx
@@ -29,7 +29,7 @@ class DeNormalize(object):
 
 def dir_exists(path):
     if not os.path.exists(path):
-            os.makedirs(path)
+        os.makedirs(path)
 
 
 def initialize_weights(*models):
@@ -50,25 +50,26 @@ def initialize_weights(*models):
 def colorize_mask(mask, palette):
     zero_pad = 256 * 3 - len(palette)
     for i in range(zero_pad):
-                    palette.append(0)
+        palette.append(0)
     palette[-3:] = [255, 255, 255]
     new_mask = PIL.Image.fromarray(mask.astype(np.uint8)).convert('P')
     new_mask.putpalette(palette)
     return new_mask
 
 
-def set_trainable_attr(m,b):
+def set_trainable_attr(m, b):
     m.trainable = b
     for p in m.parameters(): p.requires_grad = b
+
 
 def apply_leaf(m, f):
     c = m if isinstance(m, (list, tuple)) else list(m.children())
     if isinstance(m, nn.Module):
         f(m)
-    if len(c)>0:
+    if len(c) > 0:
         for l in c:
-            apply_leaf(l,f)
+            apply_leaf(l, f)
+
 
 def set_trainable(l, b):
-    apply_leaf(l, lambda m: set_trainable_attr(m,b))
-
+    apply_leaf(l, lambda m: set_trainable_attr(m, b))
