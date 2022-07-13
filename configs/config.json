@@ -45,7 +45,7 @@
     }
   },
   "train_supervised": {
-    "data_dir": "VOCtrainval_11-May-2012",
+    "data_dir": "/mnt/data/home/david/datasets/voc",
     "batch_size": 10,
     "crop_size": 320,
     "shuffle": true,
@@ -59,7 +59,7 @@
     "num_workers": 8
   },
   "train_unsupervised": {
-    "data_dir": "VOCtrainval_11-May-2012",
+    "data_dir": "/mnt/data/home/david/datasets/voc",
     "weak_labels_output": "pseudo_labels/result/pseudo_labels",
     "batch_size": 10,
     "crop_size": 320,
@@ -74,7 +74,7 @@
     "num_workers": 8
   },
   "val_loader": {
-    "data_dir": "VOCtrainval_11-May-2012",
+    "data_dir": "/mnt/data/home/david/datasets/voc",
     "batch_size": 1,
     "val": true,
     "split": "val",
