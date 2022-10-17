@@ -4,7 +4,7 @@
 
 #### [Paper](https://arxiv.org/abs/2003.09005), [Project Page](https://yassouali.github.io/cct_page/)
 
-This repo contains the official implementation of CVPR 2020 paper: Semi-Supervised Semantic Segmentation with Cross-Consistecy Training, which
+This repo contains the official implementation of CVPR 2020 paper: Semi-Supervised Semantic Segmentation with Cross-Consistency Training, which
 adapts the traditional consistency training framework of semi-supervised learning for semantic segmentation, with an extension to weak-supervised
 learning and learning on multiple domains.
 
@@ -16,8 +16,8 @@ learning and learning on multiple domains.
 We observe that for semantic segmentation, due to the dense nature of the task,
 the cluster assumption is more easily enforced over the hidden representations rather than the inputs.
 
-**(2) Cross-Consistecy Training.** \
-We propose CCT (Cross-Consistecy Training) for semi-supervised semantic segmentation, where we define
+**(2) Cross-Consistency Training.** \
+We propose CCT (Cross-Consistency Training) for semi-supervised semantic segmentation, where we define
 a number of novel perturbations, and show the effectiveness of enforcing consistency over the encoder's outputs
 rather than the inputs.
 
